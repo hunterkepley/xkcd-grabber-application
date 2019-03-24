@@ -10,11 +10,10 @@ Just ncurses
 
 ## On CentOS/RHEL/Fedora
 
-`sudo dnf install ncurses-devel`
-
-* On older versions *
-
 `sudo yum install ncurses-devel`
+
+### On newer versions of Fedora
+`sudo dnf install ncurses-devel`
 
 # Compile
 
