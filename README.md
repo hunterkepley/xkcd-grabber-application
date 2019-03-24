@@ -1,18 +1,18 @@
 # XKCD Grabber Application
 
-# Requisites
+## Requisites
 
 Just ncurses
 
-## On Ubuntu/Debian
+### On Ubuntu/Debian
 
 `sudo apt-get install libncurses5-dev libncursesw5-dev`
 
-## On CentOS/RHEL/Fedora
+### On CentOS/RHEL/Fedora
 
 `sudo yum install ncurses-devel`
 
-### On newer versions of Fedora
+#### On newer versions of Fedora
 `sudo dnf install ncurses-devel`
 
 # Compile
