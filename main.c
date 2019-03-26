@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main() {
 	WINDOW *w;
@@ -7,8 +8,14 @@ int main() {
 	keypad(stdscr, TRUE);
 	noecho();
 
-	char list[2][8] = {"One", "Two"};
-	char item[8];
+	char originalList[3][16] = {"Random", "Multiple comics", "Specific comic"};
+	char originalItem[16];
+
+	char *list = *originalList;
+	char *item = originalItem;
+
+	char subList[2][21] = {"Change Directory", "Multiple directories"};
+	char subItem[21];
 
 	int hl = 0, choice;
 
@@ -20,6 +27,8 @@ int main() {
 	w = newwin(6, xMax-12, yMax-8, 5); // Create a new window
 	box(w, 0, 0); // sets default borders for the window
 
+	char title[] = "XKCD Comic Grabber";
+	mvprintw(yMax/3,(xMax-strlen(title))/2, "%s",title);
 	refresh();
 	wrefresh(w); // update the terminal screen
 
@@ -29,10 +38,11 @@ int main() {
 
 	// get input
 	while(1) {
+		printw("XKCD Comic Grabber");
 		for(int i = 0; i < (sizeof(list)/sizeof(item)); i++) {
 			if(i == hl)
 				wattron(w, A_STANDOUT);
-			mvwprintw(w, i+1, 1, list[i]);
+			mvwprintw(w, i+1, 1, &list[i]);
 			wattroff(w, A_STANDOUT);
 		}
 		choice = wgetch(w);
@@ -48,7 +58,7 @@ int main() {
 		}
 		if(choice == 10) {
 			finalChoice = hl;
-			break;
+			list = *subList;
 		} else if(choice == 'q')  // Quit
 			break;
 		
@@ -60,6 +70,8 @@ int main() {
 		printf("Choice 1 chosen");
 	} else if(finalChoice == 1) {
 		printf("Choice 2 chosen");
+	} else if(finalChoice == 2) {
+		printf("Choice 3 chosen");
 	}
 
 	return 0;
