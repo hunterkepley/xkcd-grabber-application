@@ -7,7 +7,7 @@ typedef struct {
 	char **items;
 } List;
 
-void displayList(List list, int *hl, WINDOW *w);
+void displayList(List list, int hl, WINDOW *w);
 
 List initList(int itemsSize, char **rawList);
 
@@ -38,8 +38,7 @@ int main() {
 	char title[] = "XKCD Comic Grabber";
 	mvprintw(yMax/3,(xMax-strlen(title))/2, "%s",title);
 	refresh();
-	wrefresh(w); // update the terminal screen
-
+	
 	keypad(w, TRUE); // enable keyboard input for the window
 
 	curs_set(0);
@@ -47,19 +46,44 @@ int main() {
 	// get input
 	while(1) {
 		printw("XKCD Comic Grabber");
+		
+		int choice = 0;
 
-		if(currentList == 0)
-			displayList(firstList, &hl, w);
-		else if(currentList == 1)
-			displayList(secondList, &hl, w);
-		else {
+		if(currentList == 0) {
+			displayList(firstList, hl, w);
+			choice = wgetch(w);
+			switch(choice) {
+			case KEY_UP:
+				hl--;
+				hl = (hl < 0) ? firstList.itemsSize-1 : hl;
+				break;
+			case KEY_DOWN:
+				hl++;
+				hl = (hl > firstList.itemsSize-1) ? 0 : hl;
+				break;
+			}
+		} else if(currentList == 1) {
+			displayList(secondList, hl, w);
+			choice = wgetch(w);
+			switch(choice) {
+			case KEY_UP:
+				hl--;
+				hl = (hl < 0) ? secondList.itemsSize-1 : hl;
+				break;
+			case KEY_DOWN:
+				hl++;
+				hl = (hl > secondList.itemsSize-1) ? 0 : hl;
+				break;
+			}
+		} else {
 			break;
 		}
-		
-		int choice = wgetch(w);
 
 		if(choice == 10) {
 			currentList++;
+			wclear(w);
+			box(w, 0, 0); // sets default borders for the window
+			wrefresh(w);
 			hl = 0;
 		} else if(choice == 'q')  // Quit
 			break;
@@ -78,23 +102,12 @@ int main() {
 	return 0;
 }
 
-void displayList(List list, int *hl, WINDOW *w) {
+void displayList(List list, int hl, WINDOW *w) {
 	for(int i = 0; i < list.itemsSize; i++) {
-			if(i == *hl)
-				wattron(w, A_STANDOUT);
-			mvwprintw(w, i+1, 1, list.items[i]);
-			wattroff(w, A_STANDOUT);
-	}
-	int choice = wgetch(w);
-	switch(choice) {
-		case KEY_UP:
-			*hl--;
-			*hl = (*hl < 0) ? list.itemsSize : *hl;
-			break;
-		case KEY_DOWN:
-			*hl++;
-			*hl = (*hl > list.itemsSize-1) ? 0 : *hl;
-			break;
+		if(i == hl)
+			wattron(w, A_STANDOUT);
+		mvwprintw(w, i+1, 1, list.items[i]);
+		wattroff(w, A_STANDOUT);
 	}
 }
 
