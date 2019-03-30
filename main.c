@@ -1,15 +1,18 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef struct {
 	int itemsSize;
 	char **items;
 } List;
 
-void displayList(List list, int hl, WINDOW *w);
+void displayList(List, int, WINDOW*);
 
-List initList(int itemsSize, char **rawList);
+List initList(int, char**);
+
+void exitProgram(WINDOW *w);
 
 int main() {
 	WINDOW *w;
@@ -27,7 +30,6 @@ int main() {
 	int currentList = 0; // 0 = first list, 1 = second list
 
 	int firstChoice = -1, secondChoice = -1;
-	int *finalChoice = &firstChoice;
 
 	int yMax, xMax;
 	getmaxyx(stdscr, yMax, xMax);
@@ -38,10 +40,13 @@ int main() {
 	char title[] = "XKCD Comic Grabber";
 	mvprintw(yMax/3,(xMax-strlen(title))/2, "%s",title);
 	refresh();
-	
 	keypad(w, TRUE); // enable keyboard input for the window
 
 	curs_set(0);
+
+	char directory[100];
+
+	bool directoryInit = false;
 
 	// get input
 	while(1) {
@@ -75,8 +80,26 @@ int main() {
 				hl = (hl > secondList.itemsSize-1) ? 0 : hl;
 				break;
 			}
-		} else {
-			break;
+		} else if(currentList == 2) {
+			if(!directoryInit)
+				wclear(w);
+				box(w, 0, 0);
+				wrefresh(w);
+				mvwprintw(w, 1, 1, "Type a directory: ");
+			directoryInit = true;
+			int newAppend = wgetch(w);
+			int dirLen = strlen(directory);
+			if(newAppend == 10) 
+				break;
+			else if(newAppend != KEY_BACKSPACE) {
+				directory[dirLen] = newAppend;
+				directory[dirLen+1] = '\0';
+			} else
+				directory[dirLen-1] = '\0';
+			wclear(w);
+			box(w, 0, 0);
+			wrefresh(w);
+			mvwprintw(w, 1, 19, directory);
 		}
 
 		if(choice == 10) {
@@ -84,13 +107,21 @@ int main() {
 			wclear(w);
 			box(w, 0, 0); // sets default borders for the window
 			wrefresh(w);
+			if(currentList == 1)
+				firstChoice = hl;
+			if(currentList == 2)
+				secondChoice = hl;
 			hl = 0;
-		} else if(choice == 'q')  // Quit
+		} else if(choice == 'q' || choice == 'q')  // Quit
 			break;
 		
 	}
-	delwin(w); // Delete window
-	endwin(); // End curses mode
+
+	exitProgram(w);
+
+	printf("%s\n", directory);
+
+	system(directory);
 
 	for(int i = 0; i < firstList.itemsSize; i++)
 		free(firstList.items[i]);
@@ -100,6 +131,11 @@ int main() {
 	free(secondList.items);
 
 	return 0;
+}
+
+void exitProgram(WINDOW *w) {
+	delwin(w);
+	endwin();
 }
 
 void displayList(List list, int hl, WINDOW *w) {
