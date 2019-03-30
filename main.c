@@ -20,9 +20,9 @@ int main() {
 	keypad(stdscr, TRUE);
 	noecho();
 
-	char *rawFirst[] = {"Random", "Multiple comics", "Specific comic"};
+	char *rawFirst[] = {"Random", "Multiple comics", "Specific comic", "Newest comic"};
 	char *rawSecond[] = {"Change directory", "Same directory", "Cancel/Exit"};
-	List firstList = initList(3, rawFirst);
+	List firstList = initList(4, rawFirst);
 	List secondList = initList(3, rawSecond);
 
 	int hl = 0;
@@ -44,9 +44,11 @@ int main() {
 
 	curs_set(0);
 
-	char directory[100];
+	char directory[100]; // For custom directory
+	int multiple1 = 1, multiple2 = 2; // For multiple comics
+	char multiple1Input[10], multiple2Input[10];
 
-	bool directoryInit = false;
+	bool directoryInit = false, multipleInit = false; // Flags for window inits
 
 	// get input
 	while(1) {
@@ -83,23 +85,34 @@ int main() {
 		} else if(currentList == 2) {
 			if(!directoryInit)
 				wclear(w);
-				box(w, 0, 0);
-				wrefresh(w);
-				mvwprintw(w, 1, 1, "Type a directory: ");
+			box(w, 0, 0);
+			mvwprintw(w, 1, 1, "Type a directory: ");
 			directoryInit = true;
 			int newAppend = wgetch(w);
 			int dirLen = strlen(directory);
 			if(newAppend == 10) 
-				break;
+				if(firstChoice != 1)
+					break;
+				else
+					currentList++;
 			else if(newAppend != KEY_BACKSPACE) {
 				directory[dirLen] = newAppend;
 				directory[dirLen+1] = '\0';
 			} else
 				directory[dirLen-1] = '\0';
 			wclear(w);
-			box(w, 0, 0);
 			wrefresh(w);
 			mvwprintw(w, 1, 19, directory);
+		} else if(currentList == 3) {
+			if(!multipleInit)
+				wclear(w);
+			box(w, 0, 0);
+			mvwprintw(w, 1, 1, "Type starting comic: ");
+			multipleInit = true;
+			int newAppend = wgetch(w);
+			if(newAppend == 10) {
+				break;
+			}
 		}
 
 		if(choice == 10) {
@@ -119,9 +132,29 @@ int main() {
 
 	exitProgram(w);
 
-	printf("%s\n", directory);
+	char commandToRun[40];
 
-	system(directory);
+	switch(secondChoice) {
+	case(0):
+		strcpy(commandToRun, "python3 script/main.py -d ");
+		strcat(commandToRun, directory);
+		break;
+	case(1):
+		strcpy(commandToRun, "python3 script/main.py");
+		break;
+	default:
+		break;
+	}
+
+	switch(firstChoice) {
+	case(0):
+		strcat(commandToRun, " -r");
+		break;
+	case(1):
+		break;
+	}
+
+	system(commandToRun);
 
 	for(int i = 0; i < firstList.itemsSize; i++)
 		free(firstList.items[i]);

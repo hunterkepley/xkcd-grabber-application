@@ -1,1 +1,1 @@
-gcc -o xkcd *.c -lncurses
+gcc -o xkcdGrabber *.c -lncurses
