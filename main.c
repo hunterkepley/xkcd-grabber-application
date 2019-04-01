@@ -44,9 +44,8 @@ int main() {
 
 	curs_set(0);
 
+	char *multiple2 = malloc(25), *multiple1 = malloc(25); // For multiple comics
 	char directory[100]; // For custom directory
-	int multiple1 = 1, multiple2 = 2; // For multiple comics
-	char multiple1Input[10], multiple2Input[10];
 
 	bool directoryInit = false, multipleInit = false; // Flags for window inits
 
@@ -83,8 +82,20 @@ int main() {
 				break;
 			}
 		} else if(currentList == 2) {
-			if(!directoryInit)
+			if(secondChoice != 0) {
+				currentList++;
+				continue;
+			}
+			if(!directoryInit) {
 				wclear(w);
+				// Free the menus
+				for(int i = 0; i < firstList.itemsSize; i++)
+					free(firstList.items[i]);
+				for(int i = 0; i < secondList.itemsSize; i++)
+					free(secondList.items[i]);
+				free(firstList.items);
+				free(secondList.items);
+			}
 			box(w, 0, 0);
 			mvwprintw(w, 1, 1, "Type a directory: ");
 			directoryInit = true;
@@ -104,15 +115,44 @@ int main() {
 			wrefresh(w);
 			mvwprintw(w, 1, 19, directory);
 		} else if(currentList == 3) {
+			if(firstChoice != 1)
+				break;
 			if(!multipleInit)
 				wclear(w);
 			box(w, 0, 0);
-			mvwprintw(w, 1, 1, "Type starting comic: ");
+			mvwprintw(w, 1, 1, "Type starting comic:");
 			multipleInit = true;
 			int newAppend = wgetch(w);
+			int multiple1Len = strlen(multiple1);
+			if(newAppend == 10) {
+				currentList++;
+				multipleInit = false;
+			} else if(newAppend != KEY_BACKSPACE) {
+				multiple1[multiple1Len] = newAppend;
+				multiple1[multiple1Len+1] = '\0';
+			} else
+				multiple1[multiple1Len-1] = '\0';
+			wclear(w);
+			wrefresh(w);
+			mvwprintw(w, 1, 21, multiple1);
+		} else if(currentList == 4) {
+			if(!multipleInit)
+				wclear(w);
+			box(w, 0, 0);
+			mvwprintw(w, 1, 1, "Type end comic:");
+			multipleInit = true;
+			int newAppend = wgetch(w);
+			int multiple2Len = strlen(multiple2);
 			if(newAppend == 10) {
 				break;
-			}
+			} else if(newAppend != KEY_BACKSPACE) {
+				multiple2[multiple2Len] = newAppend;
+				multiple2[multiple2Len+1] = '\0';
+			} else
+				multiple2[multiple2Len-1] = '\0';
+			wclear(w);
+			wrefresh(w);
+			mvwprintw(w, 1, 16, multiple2);
 		}
 
 		if(choice == 10) {
@@ -156,12 +196,8 @@ int main() {
 
 	system(commandToRun);
 
-	for(int i = 0; i < firstList.itemsSize; i++)
-		free(firstList.items[i]);
-	for(int i = 0; i < secondList.itemsSize; i++)
-		free(secondList.items[i]);
-	free(firstList.items);
-	free(secondList.items);
+	free(multiple1);
+	free(multiple2);
 
 	return 0;
 }
